@@ -26,7 +26,7 @@ END;
 $$ language 'plpgsql';
 
 -- create enum --
-CREATE TYPE 'order_status' AS ENUM(
+CREATE TYPE order_status AS ENUM (
     'waiting',
     'shipping',
     'completed',
@@ -92,7 +92,7 @@ CREATE TABLE "orders" (
   "user_id" VARCHAR NOT NULL,
   "contact" VARCHAR NOT NULL,
   "address" VARCHAR NOT NULL,
-  "tranfer_slip" JSONB,
+  "transfer_slip" JSONB,
   "status" order_status NOT NULL,
   "created_at" TIMESTAMP NOT NULL DEFAULT now(),
   "updated_at" TIMESTAMP NOT NULL DEFAULT now()
@@ -102,7 +102,7 @@ CREATE TABLE "products_orders" (
   "id" uuid NOT NULL UNIQUE PRIMARY KEY DEFAULT uuid_generate_v4(),
   "order_id" VARCHAR NOT NULL,
   "qty" INT NOT NULL DEFAULT 1,
-  "product_id" JSONB
+  "product" JSONB
 );
 
 ALTER TABLE "products_categories" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");

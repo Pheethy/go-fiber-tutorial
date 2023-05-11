@@ -66,7 +66,7 @@ CREATE TABLE "products_orders" (
   "id" VARCHAR PRIMARY KEY,
   "order_id" VARCHAR,
   "qty" INT,
-  "product_id" JSONB
+  "product" JSONB
 );
 
 ALTER TABLE "products_categories" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
