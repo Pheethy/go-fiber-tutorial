@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"os"
@@ -68,7 +69,7 @@ func LoadConfig(path string) Iconfig {
 			}(),
 			gcpBucket: envMap["APP_GCP_BUCKET"],
 		},
-		db:  &db{
+		db: &db{
 			host: envMap["DB_HOST"],
 			port: func() int {
 				p, err := strconv.Atoi(envMap["DB_PORT"])
@@ -81,7 +82,7 @@ func LoadConfig(path string) Iconfig {
 			username: envMap["DB_USERNAME"],
 			password: envMap["DB_PASSWORD"],
 			database: envMap["DB_DATABASE"],
-			sslMode: envMap["DB_SSL_MODE"],
+			sslMode:  envMap["DB_SSL_MODE"],
 			maxConnection: func() int {
 				con, err := strconv.Atoi(envMap["DB_MAX_CONNECTIONS"])
 				if err != nil {
@@ -91,9 +92,9 @@ func LoadConfig(path string) Iconfig {
 			}(),
 		},
 		jwt: &jwt{
-			adminKey: envMap["APP_ADMIN_KEY"],
+			adminKey:  envMap["JWT_ADMIN_KEY"],
 			secretKey: envMap["JWT_SECRET_KEY"],
-			apiKey: envMap["APP_API_KEY"],
+			apiKey:    envMap["JWT_API_KEY"],
 			accessExpiresAt: func() int {
 				ex, err := strconv.Atoi(envMap["JWT_ACCESS_EXPIRES"])
 				if err != nil {
@@ -111,28 +112,64 @@ func LoadConfig(path string) Iconfig {
 		},
 	}
 }
+
 // Struct
 type config struct {
 	app *app
 	db  *db
 	jwt *jwt
 }
-// Interface
+
+// Port Interface
 type Iconfig interface {
 	App() IAppConfig
 	Db() IDbConfig
 	Jwt() IJwtConfig
 }
+
 type IAppConfig interface {
-}
-type IDbConfig interface{
-}
-type IJwtConfig interface{
+	Url() string //host:port
+	Name() string
+	Version() string
+	ReadTimeOut() time.Duration
+	WriteTimeOut() time.Duration
+	BodyLimit() int
+	FileLimit() int
+	GCPBucket() string
 }
 
+type IDbConfig interface {
+}
+type IJwtConfig interface {
+}
 
-func (a *config) App() IAppConfig {
-	return &app{}
+func (c *config) App() IAppConfig {
+	return c.app
+}
+
+func (a *app) Url() string {
+	return fmt.Sprintf("%s:%d", a.host, a.port)
+}
+func (a *app) Name() string {
+	return a.name
+}
+func (a *app) Version() string {
+	return a.version
+}
+func (a *app) ReadTimeOut() time.Duration {
+	return a.readTimeOut
+}
+func (a *app) WriteTimeOut() time.Duration {
+	return a.writeTimeOut
+}
+func (a *app) BodyLimit() int    { 
+	return a.bodyLimit
+}
+func (a *app) FileLimit() int    { 
+	return a.fileLimit
+}
+func (a *app) GCPBucket() string {
+	return a.gcpBucket
 }
 
 type app struct {
@@ -147,10 +184,8 @@ type app struct {
 	gcpBucket    string
 }
 
-
-
-func (a *config) Db() IDbConfig {
-	return &db{}
+func (c *config) Db() IDbConfig {
+	return c.db
 }
 
 type db struct {
@@ -164,9 +199,7 @@ type db struct {
 	maxConnection int
 }
 
-
-
-func (a *config) Jwt() IJwtConfig {
+func (c *config) Jwt() IJwtConfig {
 	return &jwt{}
 }
 
