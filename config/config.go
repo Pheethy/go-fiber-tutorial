@@ -4,21 +4,13 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
-func envPath() string {
-	if len(os.Args) == 1 {
-		return ".env"
-	} else {
-		return os.Args[1]
-	}
-}
-
+/* LoadConfig เป็นตัวดึงข้อมูลจาก env มาใส่ใน struct */
 func LoadConfig(path string) Iconfig {
 	envMap, err := godotenv.Read(path)
 	if err != nil {
@@ -127,6 +119,10 @@ type Iconfig interface {
 	Jwt() IJwtConfig
 }
 
+func (c *config) App() IAppConfig {
+	return c.app
+}
+
 type IAppConfig interface {
 	Url() string //host:port
 	Name() string
@@ -136,15 +132,6 @@ type IAppConfig interface {
 	BodyLimit() int
 	FileLimit() int
 	GCPBucket() string
-}
-
-type IDbConfig interface {
-}
-type IJwtConfig interface {
-}
-
-func (c *config) App() IAppConfig {
-	return c.app
 }
 
 func (a *app) Url() string {
@@ -162,10 +149,10 @@ func (a *app) ReadTimeOut() time.Duration {
 func (a *app) WriteTimeOut() time.Duration {
 	return a.writeTimeOut
 }
-func (a *app) BodyLimit() int    { 
+func (a *app) BodyLimit() int {
 	return a.bodyLimit
 }
-func (a *app) FileLimit() int    { 
+func (a *app) FileLimit() int {
 	return a.fileLimit
 }
 func (a *app) GCPBucket() string {
@@ -188,6 +175,18 @@ func (c *config) Db() IDbConfig {
 	return c.db
 }
 
+type IDbConfig interface {
+	Url() string
+	MaxConns() int
+}
+
+func (d *db) Url() string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", d.host, d.port, d.username, d.password, d.database, d.sslMode)
+}
+func (d *db) MaxConns() int {
+	return d.maxConnection
+}
+
 type db struct {
 	host          string
 	port          int
@@ -200,7 +199,31 @@ type db struct {
 }
 
 func (c *config) Jwt() IJwtConfig {
-	return &jwt{}
+	return c.jwt
+}
+
+type IJwtConfig interface {
+	AdminKey() []byte
+	SecretKey() []byte
+	ApiKey() []byte
+	AccessExpiresAt() int
+	RefreshExpiresAt() int
+}
+
+func (j *jwt) AdminKey() []byte {
+	return []byte(j.adminKey)
+}
+func (j *jwt) SecretKey() []byte {
+	return []byte(j.secretKey)
+}
+func (j *jwt) ApiKey() []byte {
+	return []byte(j.apiKey)
+}
+func (j *jwt) AccessExpiresAt() int {
+	return j.accessExpiresAt
+}
+func (j *jwt) RefreshExpiresAt() int {
+	return j.refreshExpiresAt
 }
 
 type jwt struct {
