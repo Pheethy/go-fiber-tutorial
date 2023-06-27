@@ -2,6 +2,9 @@ package servers
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"os/signal"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
@@ -33,6 +36,24 @@ func NewServer(cfg config.Iconfig, db *sqlx.DB) IServer {
 	}
 }
 
-func (s server) Start() {
+func (s *server) Start() {
+	// MiddleWare
+
+	// Modules
+	v1 := s.app.Group("v1")
+	mod := NewModuleFactory(v1, s)
+	mod.MonitorModule()
+
 	// Graceful Shutdown
+	var c = make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func ()  {
+		_ = <-c
+		log.Println("Server is shutting down...")
+		_ = s.app.Shutdown()
+	}()
+
+	//Listen to host:port
+	log.Printf("Server is starting on %v", s.cfg.App().Url())
+	s.app.Listen(s.cfg.App().Url())
 }

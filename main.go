@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/pheethy/go-fiber-tutorial/config"
+	"github.com/pheethy/go-fiber-tutorial/modules/servers"
 	"github.com/pheethy/go-fiber-tutorial/pkg/database"
 )
 
@@ -19,8 +19,10 @@ func envPath() string {
 
 func main() {
 	var ctx = context.Background()
-	cfg := config.LoadConfig(envPath())
-	db := database.DbConnect(ctx, cfg.Db())
+	var cfg = config.LoadConfig(envPath())
+	var db = database.DbConnect(ctx, cfg.Db())
 	defer db.Close()
-	fmt.Println(os.Args)
+
+	var serve = servers.NewServer(cfg, db)
+	serve.Start()
 }
