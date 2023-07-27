@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/pheethy/go-fiber-tutorial/config"
@@ -22,7 +23,8 @@ func main() {
 	var cfg = config.LoadConfig(envPath())
 	var db = database.DbConnect(ctx, cfg.Db())
 	defer db.Close()
-
+	log.Println("os.Args", os.Args)
+	log.Println("len", len(os.Args))
 	var serve = servers.NewServer(cfg, db)
 	serve.Start()
 }

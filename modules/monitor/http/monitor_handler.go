@@ -7,6 +7,7 @@ import (
 	"github.com/pheethy/go-fiber-tutorial/config"
 	"github.com/pheethy/go-fiber-tutorial/models"
 	"github.com/pheethy/go-fiber-tutorial/modules/monitor"
+	"github.com/pheethy/go-fiber-tutorial/pkg/logger"
 )
 
 type monitorHandler struct {
@@ -24,5 +25,7 @@ func (h *monitorHandler) HealthCheck(c *fiber.Ctx) error {
 		Name: h.cfg.App().Name(),
 		Version: h.cfg.App().Version(),
 	}
+
+	logger.InitLogger(c, &resp).Print().Save()
 	return c.Status(http.StatusOK).JSON(resp)
 }

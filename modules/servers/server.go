@@ -38,10 +38,11 @@ func NewServer(cfg config.Iconfig, db *sqlx.DB) IServer {
 
 func (s *server) Start() {
 	// MiddleWare
+	mid := InitMiddleware(s)
 
 	// Modules
-	v1 := s.app.Group("v1")
-	mod := NewModuleFactory(v1, s)
+	v1 := s.app.Group("v1", mid.Cors())
+	mod := InitModuleFactory(v1, s)
 	mod.MonitorModule()
 
 	// Graceful Shutdown

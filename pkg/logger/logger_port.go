@@ -34,9 +34,10 @@ func (l *Logger) Print() ILogger {
 	utils.Debug(l)
 	return l
 }
+
 func (l *Logger) Save() {
 	var data = utils.OutPut(l)
-	fileName := fmt.Sprintf("./assets/logs/logger_%v.txt", strings.ReplaceAll(time.Now().Format("2006-10-15"), "-", ""))
+	fileName := fmt.Sprintf("./assets/logs/logger_%v.json", strings.ReplaceAll(time.Now().Format("2006-10-15"), "-", ""))
 	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Opening file failed:%v", err)
@@ -45,18 +46,35 @@ func (l *Logger) Save() {
 
 	file.WriteString(string(data) + "\n")
 }
-func (l *Logger) SetQuery(c *fiber.Ctx) {}
+
+func (l *Logger) SetQuery(c *fiber.Ctx) {
+	var query any
+	if err := c.QueryParser(query); err != nil {
+		log.Printf("query parser error: %v", err)
+	}
+
+	l.Query = query
+}
+
 func (l *Logger) SetBody(c *fiber.Ctx) {
 	var body any
 	if err := c.BodyParser(body); err != nil {
 		log.Printf("body parser error: %v", err)
 	}
+
+	switch l.Body {
+	case "/v1/users/signup":
+		l.Body = "never gonna give you up!!!"
+	default:
+		l.Body = body
+	}
 }
+
 func (l *Logger) SetResp(resp any) {
 	l.Response = resp
 }
 
-func InitLogger(c *fiber.Ctx) ILogger {
+func InitLogger(c *fiber.Ctx, resp any) ILogger {
 	log := &Logger{
 		Time: time.Now().Local().Format("2006-10-02 18:00:00"),
 		Ip: c.IP(),
@@ -66,7 +84,7 @@ func InitLogger(c *fiber.Ctx) ILogger {
 
 	log.SetQuery(c)
 	log.SetBody(c)
-	log.SetResp(c)
+	log.SetResp(resp)
 
 	return log
 }

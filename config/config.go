@@ -119,10 +119,6 @@ type Iconfig interface {
 	Jwt() IJwtConfig
 }
 
-func (c *config) App() IAppConfig {
-	return c.app
-}
-
 type IAppConfig interface {
 	Url() string //host:port
 	Name() string
@@ -132,6 +128,22 @@ type IAppConfig interface {
 	BodyLimit() int
 	FileLimit() int
 	GCPBucket() string
+}
+
+type app struct {
+	host         string
+	port         int
+	name         string
+	version      string
+	readTimeOut  time.Duration
+	writeTimeOut time.Duration
+	bodyLimit    int //bytes
+	fileLimit    int //bytes
+	gcpBucket    string
+}
+
+func (c *config) App() IAppConfig {
+	return c.app
 }
 
 func (a *app) Url() string {
@@ -157,18 +169,6 @@ func (a *app) FileLimit() int {
 }
 func (a *app) GCPBucket() string {
 	return a.gcpBucket
-}
-
-type app struct {
-	host         string
-	port         int
-	name         string
-	version      string
-	readTimeOut  time.Duration
-	writeTimeOut time.Duration
-	bodyLimit    int //bytes
-	fileLimit    int //bytes
-	gcpBucket    string
 }
 
 func (c *config) Db() IDbConfig {
